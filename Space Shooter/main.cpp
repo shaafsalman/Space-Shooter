@@ -9,41 +9,74 @@
 
 using namespace std;
 
-#define screenHeight 20
-#define screenWidth 30
+#define screenHeight 30
+#define screenWidth 100
+#define shapeRows 3
+#define shapeCols 5
 
-HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+char screen[screenHeight][screenWidth];
 
-const char allien = 232;
-const char specialAllien = 233;
+int scores[screenHeight / shapeRows][screenWidth / shapeCols];
+
+const char ship[shapeRows][shapeCols] = { ' ', ' ', 24, ' ', ' ', 30, 24, 24, 24, 30, 24, 24, 24, 24, 24 };
+const char allien[shapeRows][shapeCols] = { 25, 25, 25, 25, 25, 31, 25, 25, 25, 31, ' ', ' ', 25, ' ', ' ' };
+const char specialAllien[shapeRows][shapeCols] = { 233, 233, 233, 233, 233, 31, 233, 233, 233, 31, ' ', ' ', 233, ' ', ' ' };
+
+int shipColStart = (screenWidth / 2);
+int shipRowStart = screenHeight - shapeRows;
+
+
+int nextLevelScore = 30;
 const char bullet = 254;
-const char ship = 202;
-const int alliensLimit = 3;
+const int alliensLimit = 9;
+
+const int simpleScore = 5;
+const int specialScore = 10;
+bool specialattack = true;
+
 
 int hiscore = 0;
 
-int score = 0;
+int score;
 
 int lives = 3;
 
 int levels = 1;
 
-char screen[screenHeight][screenWidth];
+void hideCursor()
+{
+	//hiding the blinking cursor
+	HANDLE return1 = GetStdHandle(STD_OUTPUT_HANDLE);
 
-int shipCol = screenWidth / 2;
-int shipRow = screenHeight - 1;
+	CONSOLE_CURSOR_INFO cursor;
+
+	GetConsoleCursorInfo(return1, &cursor);
+
+	cursor.bVisible = false;
+
+	SetConsoleCursorInfo(return1, &cursor);
+}
 
 void print()
 {
-	cout << "****************************************************************************" << endl;
-	cout << "****************************************************************************" << endl;
 
+	int hiline = screenHeight / 3;
+	int scoreline = screenHeight - 6;
+	int speedline = screenHeight / 2;
+	bool half = 0;
+
+	cout << "****************************************************************************************************************************************************************************************" << endl;
+	cout << "****************************************************************************************************************************************************************************************" << endl;
 	for (int i = 0; i < screenHeight; i++)
 	{
+		//cout << "***              ***";
+		/*
+		if (i % shapeRows == 0 && i != 0)
+		{
+			cout << endl;
+		}*/
 
-		int hiline = screenHeight / 3;
-		int scoreline = screenHeight - 6;
-		int speedline = screenHeight / 2;
+
 
 
 		if (i == 0)
@@ -54,14 +87,14 @@ void print()
 		{
 
 			cout << "*****    hard        **";
-			system("color 84");
+			system("color 04");
 		}
 		else if (i == 4 && levels == 2)
 		{
 
 			cout << "*****    Medium      **";
 
-			system("color 81");
+			system("color 01");
 
 		}
 		else if (i == 7 && levels == 1)
@@ -73,17 +106,83 @@ void print()
 		{
 			cout << "***********************";
 		}
+		else if (i == 11)
+		{
 
+			cout << "*****next level Score**";
+
+		}
+		else if (i == 14)
+		{
+			if (nextLevelScore < 100)
+			{
+				cout << "*****      " << nextLevelScore << "        **";
+			}
+
+		}
+
+
+		else if ((i == 16) && (specialattack == true))
+		{
+			cout << "***** special attack **";
+		}
+		else if ((i == 18) && (specialattack == true))
+		{
+			cout << "*****   incoming!    **";
+
+		}
+		else if ((i == 16) && (specialattack == false))
+		{
+			cout << "*****    status      **";
+
+
+		}
+		else if ((i == 18) && (specialattack == false))
+		{
+			cout << "*****    active      **";
+
+		}
 		else
 		{
 			cout << "*****                **";
 		}
 
+
+
+
+
+
+
+
+
+
+
+
 		for (int j = 0; j < screenWidth; j++)
 		{
 
+			if (j != 0 && j % shapeCols == 0)
+			{
+				cout << "  ";
+			}
 			cout << screen[i][j];
-		}  //game ui
+
+
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -93,15 +192,16 @@ void print()
 			cout << "***********************" << endl;
 
 		}
+
 		else if (i == 0)
 		{
 			cout << "*****   High Score   **" << endl;
 		}
-		else if (i == 3)
+		else if (i == 4)
 		{
 			if (hiscore >= 10 && hiscore < 100)
 			{
-				cout << "*****      " << hiscore << "       **" << endl;
+				cout << "*****      " << hiscore << "        **" << endl;
 			}
 			else if (hiscore >= 100)
 			{
@@ -109,14 +209,12 @@ void print()
 			}
 			else
 			{
-				cout << "*****      " << hiscore << "       **" << endl;
+				cout << "*****      " << hiscore << "         **" << endl;
 			}
 		}
 
 
-
-
-		else if (i == hiline + 1)
+		else if (i == hiline + 3)
 		{
 
 			cout << "*****     Score      **" << endl;
@@ -125,11 +223,11 @@ void print()
 		{
 			if (score >= 10 && score < 100)
 			{
-				cout << "*****      " << score << "         **" << endl;
+				cout << "*****      " << score << "        **" << endl;
 			}
 			else if (score >= 100)
 			{
-				cout << "*****      " << score << "         **" << endl;
+				cout << "*****      " << score << "       **" << endl;
 			}
 
 			else
@@ -150,22 +248,26 @@ void print()
 			cout << "*****       " << lives << "        **" << endl;
 		}
 
+
 		else
 		{
 			cout << "*****                **" << endl;
 		}
 
 
-
 	}
+	cout << "****************************************************************************************************************************************************************************************" << endl;
+	cout << "****************************************************************************************************************************************************************************************" << endl;
 
-
-	cout << "****************************************************************************" << endl;
-
-	cout << "****************************************************************************" << endl;
-
+	/*cout << "Lives: " << lives << endl;
+	cout << "High Score: " << hiscore << endl;
+	cout << "Score: " << score << endl;
+	cout << "Levels: " << levels << endl;
+	*/
 
 }
+
+//////////////////////////////////////////////////////////
 
 bool widthBoundaryCheck(int num)
 {
@@ -201,29 +303,52 @@ bool heightBoundaryCheck(int num)
 
 bool AllienCheck(int row, int col)
 {
-	if (screen[row][col] == allien || screen[row][col] == specialAllien)
+	char temp = 233;
+
+	if (screen[row][col] == temp || screen[row][col] == 25)
 	{
 		return false;
 	}
 
-	else
+	return true;
+
+}
+
+void shiftShip(int startRow, int startCol)
+{
+	int k, l;
+
+	k = startRow;
+	for (int i = 0; i < shapeRows; i++)
 	{
-		return true;
+		l = startCol;
+		for (int j = 0; j < shapeCols; j++)
+		{
+			screen[k][l] = ship[i][j];
+			l++;
+		}
+		k++;
 	}
 }
 
 void moveShip(char key)
 {
-
 	if (key == 'd' || key == 'D')
 	{
-		if (widthBoundaryCheck(shipCol + 1))
+		if (widthBoundaryCheck(shipColStart + shapeCols))
 		{
-			if (AllienCheck(shipRow, shipCol + 1))
+			if (AllienCheck(shipRowStart, shipColStart + shapeCols))
 			{
-				screen[shipRow][shipCol] = ' ';
-				shipCol++;
-				screen[shipRow][shipCol] = ship;
+
+				for (int i = shipRowStart; i < shipRowStart + shapeRows; i++)
+				{
+					for (int j = shipColStart; j < (shipColStart + shapeCols); j++)
+					{
+						screen[i][j] = ' ';
+					}
+				}
+				shipColStart += shapeCols;
+				shiftShip(shipRowStart, shipColStart);
 			}
 
 		}
@@ -232,13 +357,19 @@ void moveShip(char key)
 
 	else if (key == 'w' || key == 'W')
 	{
-		if (heightBoundaryCheck(shipRow - 1))
+		if (heightBoundaryCheck(shipRowStart - shapeRows))
 		{
-			if (AllienCheck(shipRow - 1, shipCol))
+			if (AllienCheck(shipRowStart - 1, shipColStart + 2))
 			{
-				screen[shipRow][shipCol] = ' ';
-				shipRow--;
-				screen[shipRow][shipCol] = ship;
+				for (int i = shipRowStart; i < shipRowStart + shapeRows; i++)
+				{
+					for (int j = shipColStart; j < (shipColStart + shapeCols); j++)
+					{
+						screen[i][j] = ' ';
+					}
+				}
+				shipRowStart -= shapeRows;
+				shiftShip(shipRowStart, shipColStart);
 			}
 
 		}
@@ -247,13 +378,19 @@ void moveShip(char key)
 
 	else if (key == 'a' || key == 'A')
 	{
-		if (widthBoundaryCheck(shipCol - 1))
+		if (widthBoundaryCheck(shipColStart - shapeCols))
 		{
-			if (AllienCheck(shipRow, shipCol - 1))
+			if (AllienCheck(shipRowStart, shipColStart - 1))
 			{
-				screen[shipRow][shipCol] = ' ';
-				shipCol--;
-				screen[shipRow][shipCol] = ship;
+				for (int i = shipRowStart; i < shipRowStart + shapeRows; i++)
+				{
+					for (int j = shipColStart; j < (shipColStart + shapeCols); j++)
+					{
+						screen[i][j] = ' ';
+					}
+				}
+				shipColStart -= shapeCols;
+				shiftShip(shipRowStart, shipColStart);
 			}
 
 		}
@@ -262,45 +399,72 @@ void moveShip(char key)
 
 	else if (key == 's' || key == 'S')
 	{
-		if (heightBoundaryCheck(shipRow + 1))
+		if (heightBoundaryCheck(shipRowStart + shapeRows))
 		{
-			if (AllienCheck(shipRow + 1, shipCol))
+
+			for (int i = shipRowStart; i < shipRowStart + shapeRows; i++)
 			{
-				screen[shipRow][shipCol] = ' ';
-				shipRow++;
-				screen[shipRow][shipCol] = ship;
+				for (int j = shipColStart; j < (shipColStart + shapeCols); j++)
+				{
+					screen[i][j] = ' ';
+				}
 			}
+			shipRowStart += shapeRows;
+			shiftShip(shipRowStart, shipColStart);
+
 
 		}
 	}
 
 }
 
-void hideCursor()
+////////////////////////////////////////////////////////
+
+int checkAllienHit(int bulletRow, int bulletCol)
 {
-	//hiding the blinking cursor
-	HANDLE return1 = GetStdHandle(STD_OUTPUT_HANDLE);
+	int scoreRow;
+	int scoreCol;
 
-	CONSOLE_CURSOR_INFO cursor;
+	if (bulletRow < alliensLimit)
+	{
 
-	GetConsoleCursorInfo(return1, &cursor);
+		scoreRow = (bulletRow / shapeRows);
+		scoreCol = (bulletCol / shapeCols);
 
-	cursor.bVisible = false;
+		return scores[scoreRow][scoreCol];
 
-	SetConsoleCursorInfo(return1, &cursor);
+	}
+
+	return 0;
+
+}
+
+void vanishAllien(int bulletRow, int bulletCol)
+{
+	bulletRow -= 2;
+	for (int i = bulletRow; i < bulletRow + shapeRows; i++)
+	{
+		for (int j = bulletCol; j < bulletCol + shapeCols; j++)
+		{
+			screen[i][j] = ' ';
+		}
+	}
 }
 
 bool moveBulletUp()
 {
-	int bulletRow = shipRow;
-	int bulletCol = shipCol;
+	int totalScore;
 
-	bulletRow--;
+	int bulletRow = shipRowStart + 1;
+	int bulletCol1 = shipColStart;
+	int bulletCol2 = shipColStart + 4;
 
-	while (screen[bulletRow][bulletCol] != allien && screen[bulletRow][bulletCol] != specialAllien && bulletRow >= 0)
+	do
 	{
-		screen[bulletRow][bulletCol] = bullet;
+		bulletRow--;
 
+		screen[bulletRow][bulletCol1] = bullet;
+		screen[bulletRow][bulletCol2] = bullet;
 		//////////////////////////////////////////////////
 		if (_kbhit())
 		{
@@ -313,7 +477,6 @@ bool moveBulletUp()
 			}
 
 
-
 		}
 		/////////////////////////////////////////////////
 
@@ -321,23 +484,18 @@ bool moveBulletUp()
 
 		print();
 
-		screen[bulletRow][bulletCol] = ' ';
+		screen[bulletRow][bulletCol1] = ' ';
+		screen[bulletRow][bulletCol2] = ' ';
 
-		bulletRow--;
-	}
+		totalScore = checkAllienHit(bulletRow, bulletCol1);
 
+	} while ((totalScore) == 0 && bulletRow >= 0);
 
-	if (screen[bulletRow][bulletCol] == allien)
+	if (totalScore > 0)
 	{
-		score += 5;
-		screen[bulletRow][bulletCol] = ' ';
-		return true;
-	}
-
-	else if (screen[bulletRow][bulletCol] == specialAllien)
-	{
-		score += 10;
-		screen[bulletRow][bulletCol] = ' ';
+		score += totalScore;
+		scores[bulletRow / shapeRows][bulletCol1 / shapeCols] = 0;
+		vanishAllien(bulletRow, bulletCol1);
 		return true;
 	}
 
@@ -347,73 +505,119 @@ bool moveBulletUp()
 	}
 }
 
+//////////////////////////////////////////////////////////////////
+
 int shipHitCheck(int allienRow[], int allienCol[], int n)
 {
+	char target = 30;
+
 	for (int i = 0; i < n; i++)
 	{
-		if (screen[allienRow[i]][allienCol[i]] == ship)
+		if (screen[allienRow[i]][allienCol[i]] == target && screen[allienRow[i]][allienCol[i] + 4] == target)
 		{
 			return false;
 		}
 	}
+
 	return true;
-
-}
-
-int findMin(int array[], int n)
-{
-	int min = 0;
-
-	for (int i = 1; i < n; i++)
-	{
-		if (array[i] < array[min])
-		{
-			min = i;
-		}
-	}
-
-	return min;
 
 }
 
 void blinkingEffect()
 {
-	for (int i = 0; i <= 5; i++)
+	for (int lcv = 0; lcv <= 5; lcv++)
 	{
-		system("cls");
 
-		if (i % 2 == 0)
+		if (lcv % 2 == 0)
 		{
-			screen[shipRow][shipCol] = ' ';
+			for (int i = shipRowStart; i < shipRowStart + shapeRows; i++)
+			{
+				for (int j = shipColStart; j < shipColStart + shapeCols; j++)
+				{
+					screen[i][j] = ' ';
+				}
+			}
 		}
 
 		else
 		{
-			screen[shipRow][shipCol] = ship;
+			int k, l;
+			k = shipRowStart;
+			for (int i = 0; i < shapeRows; i++)
+			{
+				l = shipColStart;
+				for (int j = 0; j < shapeCols; j++)
+				{
+					screen[k][l] = ship[i][j];
+					l++;
+				}
+				k++;
+			}
 		}
 
+		system("cls");
 		print();
 		Sleep(200);
 	}
 
 }
 
-bool moveBulletsDown(int allienRow[], int allienCol[], int n)
+int findMax(int array[], int n)
 {
-	int i;
-	int minShooter = findMin(allienRow, n);
+	int max = 0;
 
-	for (i = 0; i < n; i++)
+	for (int i = 1; i < n; i++)
 	{
-		allienRow[i]++;
+		if (array[i] > array[max])
+		{
+			max = i;
+		}
 	}
 
-	while (allienRow[minShooter] < screenHeight && shipHitCheck(allienRow, allienCol, n))
-	{
+	return max;
 
-		for (i = 0; i < n; i++)
+}
+
+void eliminateMaxShooter(int allienRow[], int allienCol[], int& n, int maxShooter)
+{
+	int max = allienRow[maxShooter];
+
+	for (int i = 0; i < n; i++)
+	{
+		if (allienRow[i] == max)
+		{
+			for (int j = i; j < n - 1; j++)
+			{
+				allienRow[j] = allienRow[j + 1];
+				allienCol[j] = allienCol[j + 1];
+			}
+			n--;
+			i--;
+		}
+	}
+
+}
+
+bool moveBulletsDown(int allienRow[], int allienCol[], int n)
+{
+	int maxShooter;
+	bool hitCheck;
+
+	//Translate scores into screen
+	for (int i = 0; i < n; i++)
+	{
+		allienRow[i] = allienRow[i] * 3 + 2;
+		allienCol[i] = allienCol[i] * 5;
+	}
+
+	maxShooter = findMax(allienRow, n);
+
+	do
+	{
+		for (int i = 0; i < n; i++)
 		{
 			screen[allienRow[i]][allienCol[i]] = bullet;
+			screen[allienRow[i]][allienCol[i] + 4] = bullet;
 		}
 
 		////////////////////////////////////////
@@ -432,19 +636,32 @@ bool moveBulletsDown(int allienRow[], int allienCol[], int n)
 
 		print();
 
-		for (i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 		{
 			screen[allienRow[i]][allienCol[i]] = ' ';
+			screen[allienRow[i]][allienCol[i] + 4] = ' ';
 		}
 
-		for (i = 0; i < n; i++)
+
+		for (int i = 0; i < n; i++)
 		{
 			allienRow[i]++;
 		}
 
-	}
+		hitCheck = shipHitCheck(allienRow, allienCol, n);
 
-	if (!shipHitCheck(allienRow, allienCol, n))
+		if (allienRow[maxShooter] >= 30)
+		{
+			eliminateMaxShooter(allienRow, allienCol, n, maxShooter);
+			maxShooter = findMax(allienRow, n);
+		}
+
+
+	} while (n > 0 && hitCheck);
+
+
+
+	if (!hitCheck)
 	{
 		blinkingEffect();
 		lives--;
@@ -453,15 +670,19 @@ bool moveBulletsDown(int allienRow[], int allienCol[], int n)
 
 	return false;
 
-	/*
-	for (i = 0; i < n; i++)
-	{
-	screen[allienRow[i]][allienCol[i]] = ' ';
-	}
-	*/
 
 }
 
+bool scoresAllienCheck(int row, int col)
+{
+	if (scores[row][col] == simpleScore || scores[row][col] == specialScore)
+	{
+		return false;
+	}
+
+	return true;
+
+}
 
 void allienShooter(int& randomCol, int& rowShooter)
 {
@@ -469,12 +690,11 @@ void allienShooter(int& randomCol, int& rowShooter)
 
 	while (check)
 	{
-		randomCol = rand() % screenWidth;
+		randomCol = rand() % (screenWidth / shapeCols);
 
-		rowShooter = alliensLimit;
+		rowShooter = alliensLimit / shapeRows;
 
-
-		while (rowShooter >= 0 && screen[rowShooter][randomCol] != allien && screen[rowShooter][randomCol] != specialAllien)
+		while (rowShooter >= 0 && scoresAllienCheck(rowShooter, randomCol))
 		{
 			rowShooter--;
 		}
@@ -501,44 +721,14 @@ bool checkRepition(int array1[], int array2[], int limit)
 
 }
 
-int alliensCheck()
-{
-	int count = 0;
-	bool check1;
-	int i;
-
-	for (int j = 0; j < screenWidth; j++)
-	{
-		i = alliensLimit;
-
-		check1 = true;
-		while (screen[i][j] != allien && screen[i][j] != specialAllien)
-		{
-			if (i == 0)
-			{
-				check1 = false;
-				break;
-			}
-
-			i--;
-
-		}
-
-		if (check1)
-		{
-			count++;
-		}
-
-	}
-
-
-	return count;
-
-
-}
-
 bool allienAttack(int allienRow[], int allienCol[], int simpleAttacks, int specialAttacks, int& iterations, int alliens)
 {
+
+	for (int i = 0; i < 20; i++)
+	{
+		allienRow[i] = 0;
+		allienCol[i] = 0;
+	}
 
 	if (iterations >= 0)//Simple Attack
 	{
@@ -559,6 +749,16 @@ bool allienAttack(int allienRow[], int allienCol[], int simpleAttacks, int speci
 
 	else
 	{
+		/// <summary>
+		/// /
+		/// </summary>
+		/// <param name="allienRow"></param>
+		/// <param name="allienCol"></param>
+		/// <param name="simpleAttacks"></param>
+		/// <param name="specialAttacks"></param>
+		/// <param name="iterations"></param>
+		/// <param name="alliens"></param>
+		/// <returns></returns>
 
 		if (alliens < specialAttacks)
 		{
@@ -592,34 +792,120 @@ bool allienAttack(int allienRow[], int allienCol[], int simpleAttacks, int speci
 
 }
 
+//////////////////////////////////////////////////////////////////////
+
+int alliensCheck()
+{
+	int count = 0;
+	bool check1;
+	int i;
+
+	for (int j = 0; j < screenWidth / shapeCols; j++)
+	{
+		i = alliensLimit / shapeRows;//alliensLimit
+
+		check1 = true;
+		while (scores[i][j] != 5 && scores[i][j] != 10)
+		{
+			if (i == 0)
+			{
+				check1 = false;
+				break;
+			}
+
+			i--;
+
+		}
+
+		if (check1)
+		{
+			count++;
+		}
+
+	}
+
+
+	return count;
+
+}
+
 void initializeScreen()
 {
-	for (int i = 0; i < screenHeight; i++)
+
+	int i = 0, j = 0, k = 0, l = 0;
+
+	for (i = 0; i < screenHeight; i++)
 	{
-		for (int j = 0; j < screenWidth; j++)
+		for (j = 0; j < screenWidth; j++)
 		{
 			screen[i][j] = ' ';
+			if (((i + 1) % shapeRows == 0) && ((j + 1) % shapeCols == 0))
+			{
+				scores[i / shapeRows][j / shapeCols] = 0;
+			}
 		}
 	}
 
-	screen[shipRow][shipCol] = ship;
-
-	for (int i = 0; i < alliensLimit; i++)
+	k = shipRowStart;
+	for (i = 0; i < shapeRows; i++)
 	{
-		for (int j = 0; j < screenWidth; j++)
+		l = shipColStart;
+		for (int j = 0; j < shapeCols; j++)
 		{
-			screen[i][j] = allien;
+			screen[k][l] = ship[i][j];
+			l++;
 		}
+		k++;
 	}
+
+	for (int row = 0; row < alliensLimit; row += 3)
+	{
+		for (int col = 0; col < screenWidth; col += 5)
+		{
+			k = row;
+			for (i = 0; i < shapeRows; i++)
+			{
+				l = col;
+				for (j = 0; j < shapeCols; j++)
+				{
+					screen[k][l] = allien[i][j];
+					if (((k + 1) % shapeRows == 0) && ((l + 1) % shapeCols == 0))
+					{
+						scores[k / shapeRows][l / shapeCols] = simpleScore;
+					}
+
+					l++;
+				}
+				k++;
+
+			}
+		}
+
+	}
+
 
 	int randomRow;
 	int randomCol;
-	for (int i = 0; i < 30; i++)
+	for (int i = 0; i < ((screenWidth / shapeCols) / 2); i++)//10 number of random special alliens
 	{
-		randomCol = rand() % screenWidth;
-		randomRow = rand() % alliensLimit;
+		randomCol = rand() % (screenWidth / shapeCols);
+		randomRow = rand() % shapeRows;
 
-		screen[randomRow][randomCol] = specialAllien;
+		k = randomRow * shapeRows;
+		for (int i = 0; i < shapeRows; i++)
+		{
+			l = randomCol * shapeCols;
+			for (int j = 0; j < shapeCols; j++)
+			{
+				screen[k][l] = specialAllien[i][j];
+				if (((k + 1) % shapeRows == 0) && ((l + 1) % shapeCols == 0))
+				{
+					scores[k / shapeRows][l / shapeCols] = specialScore;
+				}
+				l++;
+			}
+			k++;
+		}
 
 	}
 
@@ -687,6 +973,8 @@ void updateLevel(int& nextLevelScore, int& simpleAttack, int& specialAttacks, in
 	iterations = 0;
 }
 
+////////////////////////////////////////////////////////////////////////
+
 int main()
 {
 	srand(time(0));
@@ -695,8 +983,6 @@ int main()
 	int option;
 
 	option = menu();
-
-	int nextLevelScore = 30;
 
 	ifstream inFile;
 	ofstream outFile;
@@ -708,14 +994,8 @@ int main()
 	do
 	{
 
-
 		if (option == 1)
 		{
-
-			lives = 3;
-			score = 0;
-			levels = 1;
-
 			initializeScreen();
 
 			int allienRow[10];
@@ -723,16 +1003,19 @@ int main()
 
 			char key;
 
-			int shipCol = screenWidth / 2;
-			int shipRow = screenHeight - 1;
-
 			int simpleAttack = 1;
 			int specialAttacks = 3;
 			int specialAttackTime = 5;
 
 			int iterations = 0;
 
+
+
 			int alliens;
+
+			lives = 3;
+			score = 0;
+			levels = 1;
 
 			do
 			{
