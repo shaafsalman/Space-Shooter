@@ -1085,8 +1085,7 @@ int main()
 			outFile.open("highscore.txt");
 			outFile << hiscore;
 			outFile.close();
-
-
+			
 		}
 
 		else if (option == 2)
