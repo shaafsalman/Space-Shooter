@@ -1,0 +1,8 @@
+﻿  main.cpp
+C:\Users\ShaafSalman\source\repos\Space Shooter\Space Shooter\main.cpp(17,21): warning C4309: 'initializing': truncation of constant value
+C:\Users\ShaafSalman\source\repos\Space Shooter\Space Shooter\main.cpp(18,28): warning C4309: 'initializing': truncation of constant value
+C:\Users\ShaafSalman\source\repos\Space Shooter\Space Shooter\main.cpp(19,21): warning C4309: 'initializing': truncation of constant value
+C:\Users\ShaafSalman\source\repos\Space Shooter\Space Shooter\main.cpp(20,19): warning C4309: 'initializing': truncation of constant value
+C:\Users\ShaafSalman\source\repos\Space Shooter\Space Shooter\main.cpp(646,10): warning C4129: 'H': unrecognized character escape sequence
+C:\Users\ShaafSalman\source\repos\Space Shooter\Space Shooter\main.cpp(692,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  Space Shooter.vcxproj -> C:\Users\ShaafSalman\source\repos\Space Shooter\x64\Debug\Space Shooter.exe
